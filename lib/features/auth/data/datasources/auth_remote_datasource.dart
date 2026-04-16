@@ -9,16 +9,6 @@ class AuthRemoteDatasource {
 
   AuthRemoteDatasource(this.dio);
 
-  Future<UserModel> register(RegisterModel model) async {
-    try {
-      final response = await dio.post('/auth/register', data: model.toJson());
-
-      return UserModel.fromJson(response.data);
-    } catch (e) {
-      throw ApiException.fromDioError(e);
-    }
-  }
-
   Future<UserModel> login(LoginModel model) async {
     try {
       final response = await dio.post('/auth/login', data: model.toJson());
