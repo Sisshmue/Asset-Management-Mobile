@@ -1,10 +1,7 @@
 import 'package:asset_management_mobile/core/utils/app_theme.dart';
-import 'package:asset_management_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'core/network/auth_interceptor.dart';
 import 'core/utils/router_provider.dart';
-import 'features/assets/presentation/screens/first_page.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
