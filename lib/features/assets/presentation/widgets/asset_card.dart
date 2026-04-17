@@ -4,7 +4,7 @@ import '../../data/model/asset_model.dart';
 
 class AssetCard extends StatelessWidget {
   final Asset asset;
-  const AssetCard({required this.asset});
+  const AssetCard({super.key, required this.asset});
 
   String _formatDate(String? raw) {
     if (raw == null) return '–';
