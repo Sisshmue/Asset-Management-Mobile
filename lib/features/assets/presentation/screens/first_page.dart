@@ -15,12 +15,14 @@ class FirstPage extends ConsumerWidget {
     final List<Widget> pages = [const DashboardPage(), const ProfilePage()];
 
     return Scaffold(
+      // Extends the body behind the FAB/BottomBar if needed
+      extendBody: true,
       body: IndexedStack(index: selectedIndex, children: pages),
 
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddAssetSheet(context),
-        backgroundColor: theme.primaryColor,
+        backgroundColor: theme.primaryColor, // Your Dark Blue
         shape: const CircleBorder(),
         elevation: 4,
         child: const Icon(Icons.add, color: Colors.white, size: 30),
@@ -29,27 +31,37 @@ class FirstPage extends ConsumerWidget {
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
-        clipBehavior: Clip.antiAlias,
-        child: BottomNavigationBar(
-          currentIndex: selectedIndex,
-          onTap: (index) => ref.read(navigationProvider.notifier).state = index,
-          backgroundColor: Colors.white,
-          elevation: 0,
-          selectedItemColor: theme.primaryColor,
-          unselectedItemColor: Colors.grey,
-          type: BottomNavigationBarType.fixed,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard_customize_outlined),
-              activeIcon: Icon(Icons.dashboard_customize),
-              label: 'Dashboard',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-          ],
+        color: Colors.white,
+        // Using a Container with a specific height prevents the render exception
+        child: SizedBox(
+          height: 60,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              // Dashboard Tab
+              _NavBarItem(
+                icon: Icons.dashboard_customize_outlined,
+                activeIcon: Icons.dashboard_customize,
+                label: "Dashboard",
+                isSelected: selectedIndex == 0,
+                onTap: () => ref.read(navigationProvider.notifier).state = 0,
+                theme: theme,
+              ),
+
+              // Spacer for the Floating Action Button
+              const SizedBox(width: 40),
+
+              // Profile Tab
+              _NavBarItem(
+                icon: Icons.person_outline,
+                activeIcon: Icons.person,
+                label: "Profile",
+                isSelected: selectedIndex == 1,
+                onTap: () => ref.read(navigationProvider.notifier).state = 1,
+                theme: theme,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -66,6 +78,40 @@ class FirstPage extends ConsumerWidget {
         padding: const EdgeInsets.all(24),
         height: MediaQuery.of(context).size.height * 0.7,
         child: const Center(child: Text("Add Asset Form Goes Here")),
+      ),
+    );
+  }
+}
+
+// Custom widget for cleaner code
+class _NavBarItem extends StatelessWidget {
+  final IconData icon;
+  final IconData activeIcon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final ThemeData theme;
+
+  const _NavBarItem({
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isSelected ? theme.primaryColor : Colors.grey;
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(isSelected ? activeIcon : icon, color: color),
+          Text(label, style: TextStyle(color: color, fontSize: 12)),
+        ],
       ),
     );
   }

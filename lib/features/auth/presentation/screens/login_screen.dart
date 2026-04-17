@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../data/model/login_model.dart';
 import '../viewmodel/auth_viewmodel.dart';
 
@@ -39,25 +40,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authState = ref.watch(authViewModelProvider);
 
     ref.listen(authViewModelProvider, (previous, next) {
-      next.whenOrNull(
-        data: (user) {
-          if (user == null) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Login successful"),
-              backgroundColor: Colors.green,
-            ),
-          );
-        },
-        error: (e, _) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(e.toString()),
-              backgroundColor: Colors.redAccent,
-            ),
-          );
-        },
-      );
+      if (previous?.isLoading == true && next.hasValue) {
+        final user = next.value;
+        if (user == null) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Login successful"),
+            backgroundColor: Colors.green,
+          ),
+        );
+        context.go('/home');
+      }
+
+      if (next.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.error.toString()),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
     });
 
     return Scaffold(

@@ -2,6 +2,7 @@ import 'package:asset_management_mobile/core/utils/secure_storage.dart';
 import 'package:asset_management_mobile/features/auth/data/model/user_model.dart';
 import 'package:asset_management_mobile/features/auth/presentation/viewmodel/auth_repository_provider.dart';
 import 'package:riverpod/riverpod.dart';
+import '../../../../core/network/auth_interceptor.dart';
 import '../../data/model/login_model.dart';
 
 final authViewModelProvider = AsyncNotifierProvider<AuthViewmodel, UserModel?>(
@@ -22,6 +23,7 @@ class AuthViewmodel extends AsyncNotifier<UserModel?> {
       final token = res.token;
       if (token != null) {
         await ref.read(secureStorageProvider).saveToken(token);
+        ref.read(authTokenProvider.notifier).state = token;
       }
       state = AsyncData(res);
     } catch (e, st) {
