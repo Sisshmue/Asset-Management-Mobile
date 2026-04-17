@@ -48,7 +48,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               backgroundColor: Colors.green,
             ),
           );
-          // TODO: Navigate to home screen
         },
         error: (e, _) {
           ScaffoldMessenger.of(context).showSnackBar(
