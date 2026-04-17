@@ -1,9 +1,7 @@
 import 'package:asset_management_mobile/features/auth/data/model/user_model.dart';
 import 'package:asset_management_mobile/features/auth/presentation/viewmodel/auth_repository_provider.dart';
 import 'package:riverpod/riverpod.dart';
-
 import '../../data/model/login_model.dart';
-import '../../data/model/register_model.dart';
 
 final authViewModelProvider = AsyncNotifierProvider<AuthViewmodel, UserModel?>(
   AuthViewmodel.new,

@@ -1,3 +1,4 @@
+import 'package:asset_management_mobile/core/utils/app_theme.dart';
 import 'package:asset_management_mobile/features/auth/presentation/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +13,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
       title: 'Asset Management App',
       home: const LoginScreen(),
     );

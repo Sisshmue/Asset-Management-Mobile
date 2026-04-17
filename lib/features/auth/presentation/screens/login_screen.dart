@@ -41,6 +41,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     ref.listen(authViewModelProvider, (previous, next) {
       next.whenOrNull(
         data: (user) {
+          if (user == null) return;
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text("Login successful"),
@@ -72,11 +73,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // --- Branding Section ---
-                  const Icon(
-                    Icons.inventory_2_rounded,
-                    size: 80,
-                    color: Colors.blueAccent,
-                  ),
+                  const Icon(Icons.inventory_2_rounded, size: 80),
                   const SizedBox(height: 16),
                   Text(
                     "AssetManager",
@@ -146,7 +143,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: ElevatedButton(
                       onPressed: authState.isLoading ? null : _login,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
