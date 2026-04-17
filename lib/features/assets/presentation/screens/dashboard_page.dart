@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:asset_management_mobile/features/assets/data/model/asset_model.dart';
 import 'package:asset_management_mobile/features/assets/presentation/viewmodel/asset_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../widgets/asset_card.dart';
 import '../widgets/loading_shimmer.dart';
@@ -20,11 +21,25 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   String _filter = 'All';
   final _searchController = TextEditingController();
   Timer? _debounce;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
+        ref.read(assetViewModelProvider.notifier).fetchMoreAssets();
+      }
+    });
+  }
 
   @override
   void dispose() {
     _searchController.dispose();
     _debounce?.cancel();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -35,36 +50,54 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F5),
       body: SafeArea(
-        child: assetListState.when(
-          loading: () => const LoadingShimmer(),
-          error: (e, _) => Center(child: Text(e.toString())),
-          data: (assets) {
-            return CustomScrollView(
-              slivers: [
-                SliverToBoxAdapter(child: _buildHeader(context)),
-                SliverToBoxAdapter(child: _buildMetrics(assets)),
-                SliverToBoxAdapter(child: _buildSearchAndFilters()),
-                assets.isEmpty
-                    ? const SliverFillRemaining(
-                        child: Center(
-                          child: Text(
-                            'No assets found',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ),
-                      )
-                    : SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                        sliver: SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) => AssetCard(asset: assets[index]),
-                            childCount: assets.length,
-                          ),
-                        ),
+        child: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            SliverToBoxAdapter(child: _buildHeader(context)),
+            //SliverToBoxAdapter(child: _buildMetrics(assets)),
+            SliverToBoxAdapter(child: _buildSearchAndFilters()),
+            assetListState.when(
+              loading: () => const SliverToBoxAdapter(child: LoadingShimmer()),
+              error: (e, _) =>
+                  SliverToBoxAdapter(child: Center(child: Text(e.toString()))),
+              data: (assets) {
+                if (assets.isEmpty) {
+                  return const SliverFillRemaining(
+                    child: Center(
+                      child: Text(
+                        'No assets found',
+                        style: TextStyle(color: Colors.grey),
                       ),
-              ],
-            );
-          },
+                    ),
+                  );
+                }
+
+                return SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      if (index == assets.length) {
+                        final notifier = ref.read(
+                          assetViewModelProvider.notifier,
+                        );
+
+                        if (!notifier.hasMore) {
+                          return const SizedBox.shrink();
+                        }
+
+                        return const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
+                      return AssetCard(asset: assets[index]);
+                    }, childCount: assets.length + 1),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
