@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'package:asset_management_mobile/features/assets/data/model/asset_model.dart';
 import 'package:asset_management_mobile/features/assets/presentation/viewmodel/asset_view_model.dart';
+import 'package:asset_management_mobile/features/assets/presentation/widgets/metric_loading_shimmer.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../viewmodel/metric/metric_view_model_provider.dart';
 import '../widgets/asset_card.dart';
 import '../widgets/loading_shimmer.dart';
 import '../widgets/metric_card.dart';
@@ -54,7 +54,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           controller: _scrollController,
           slivers: [
             SliverToBoxAdapter(child: _buildHeader(context)),
-            //SliverToBoxAdapter(child: _buildMetrics(assets)),
+            SliverToBoxAdapter(child: _buildMetrics()),
             SliverToBoxAdapter(child: _buildSearchAndFilters()),
             assetListState.when(
               loading: () => const SliverToBoxAdapter(child: LoadingShimmer()),
@@ -129,40 +129,71 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _buildMetrics(List<Asset> assets) {
-    int count(String s) =>
-        assets.where((a) => (a.status ?? '').toUpperCase() == s).length;
+  Widget _buildMetrics() {
+    final metrics = ref.watch(metricViewModelProvider);
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Row(
-        children: [
-          MetricCard(
-            label: 'Total',
-            value: '${assets.length}',
-            valueColor: Colors.black87,
+    return metrics.when(
+      data: (metric) {
+        if (metric == null || metric.counts.isEmpty) {
+          return const SizedBox.shrink();
+        }
+
+        final entries = metric.counts.entries.toList();
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: SizedBox(
+            height: 100,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: entries.length,
+              itemBuilder: (context, index) {
+                final item = entries[index];
+
+                final label = _formatStatus(item.key);
+                final count = item.value;
+
+                return MetricCard(
+                  label: label,
+                  value: count.toString(),
+                  valueColor: _getStatusColor(item.key),
+                );
+              },
+            ),
           ),
-          const SizedBox(width: 10),
-          MetricCard(
-            label: 'Available',
-            value: '${count('ACTIVE')}',
-            valueColor: const Color(0xFF2E7D32),
-          ),
-          const SizedBox(width: 10),
-          MetricCard(
-            label: 'Maintena..',
-            value: '${count('MAINTENANCE')}',
-            valueColor: const Color(0xFFF57F17),
-          ),
-          const SizedBox(width: 10),
-          MetricCard(
-            label: 'Inactive',
-            value: '${count('INACTIVE')}',
-            valueColor: Colors.grey,
-          ),
-        ],
-      ),
+        );
+      },
+      error: (e, st) => const SizedBox.shrink(),
+      loading: () => const MetricLoadingShimmer(),
     );
+  }
+
+  String _formatStatus(String status) {
+    return status
+        .toLowerCase()
+        .replaceAll('_', ' ')
+        .split(' ')
+        .map((word) => word[0].toUpperCase() + word.substring(1))
+        .join(' ');
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'AVAILABLE':
+        return const Color(0xFF2E7D32);
+      case 'ASSIGNED':
+        return const Color(0xFF1565C0);
+      case 'MAINTENANCE':
+        return const Color(0xFFF9A825);
+      case 'RETIRED':
+        return const Color(0xFF616161);
+      case 'PENDING':
+        return const Color(0xFFEF6C00);
+      case 'LOST':
+        return const Color(0xFFC62828);
+      default:
+        return const Color(0xFF424242);
+    }
   }
 
   Widget _buildSearchAndFilters() {
