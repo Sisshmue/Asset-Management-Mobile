@@ -28,14 +28,14 @@ class Asset {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['name'] = this.name;
-    data['description'] = this.description;
-    data['serialNo'] = this.serialNo;
-    data['isDeleted'] = this.isDeleted;
-    data['status'] = this.status;
-    data['createdAt'] = this.createdAt;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['description'] = description;
+    data['serialNo'] = serialNo;
+    data['isDeleted'] = isDeleted;
+    data['status'] = status;
+    data['createdAt'] = createdAt;
     return data;
   }
 }

@@ -8,4 +8,13 @@ class AssetRepository {
   Future<List<Asset>> getAllAssets({int page = 1, int limit = 10}) async {
     return await _assetRemoteDatasource.getAllAssets(page: page, limit: limit);
   }
+
+  Future<List<Asset>> filterAssets({
+    String name = "",
+    String status = "",
+    int page = 1,
+    int limit = 10,
+  }) async {
+    return await _assetRemoteDatasource.filerAssets(page, limit, name, status);
+  }
 }

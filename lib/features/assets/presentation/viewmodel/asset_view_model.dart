@@ -23,4 +23,25 @@ class AssetViewModel extends AsyncNotifier<List<Asset>> {
       state = AsyncError(e, st);
     }
   }
+
+  Future<void> filterAssets({
+    String name = "",
+    String status = "",
+    int page = 1,
+    int limit = 10,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      final repo = ref.read(assetRepoProvider);
+      final response = await repo.filterAssets(
+        name: name,
+        status: status,
+        page: page,
+        limit: limit,
+      );
+      state = AsyncData(response);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
 }

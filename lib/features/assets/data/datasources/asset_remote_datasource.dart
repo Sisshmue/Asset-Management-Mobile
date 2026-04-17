@@ -12,8 +12,31 @@ class AssetRemoteDatasource {
         '/api/assets/all',
         queryParameters: {"page": page, "limit": 10},
       );
-      if (response.data is List) {
-        return response.data.map<Asset>((a) => Asset.fromJson(a)).toList();
+      final assetList = response.data['assets'];
+      if (assetList is List) {
+        return assetList.map<Asset>((a) => Asset.fromJson(a)).toList();
+      } else {
+        throw ApiException(message: 'Response is not a list');
+      }
+    } catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
+  Future<List<Asset>> filerAssets(
+    int page,
+    int limit,
+    String name,
+    String status,
+  ) async {
+    try {
+      final response = await dio.get(
+        '/api/assets/find',
+        data: {"page": page, "limit": limit, "name": name, "status": status},
+      );
+      final assetList = response.data['assets'];
+      if (assetList is List) {
+        return assetList.map<Asset>((a) => Asset.fromJson(a)).toList();
       } else {
         throw ApiException(message: 'Response is not a list');
       }
