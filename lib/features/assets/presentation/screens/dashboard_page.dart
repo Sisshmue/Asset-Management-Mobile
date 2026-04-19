@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:asset_management_mobile/features/assets/presentation/viewmodel/asset_view_model.dart';
+import 'package:asset_management_mobile/features/assets/presentation/widgets/header_widget.dart';
 import 'package:asset_management_mobile/features/assets/presentation/widgets/metric_loading_shimmer.dart';
 import 'package:asset_management_mobile/features/assets/presentation/widgets/search_filter_widget.dart';
 import 'package:flutter/material.dart';
@@ -53,7 +54,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
         child: CustomScrollView(
           controller: _scrollController,
           slivers: [
-            SliverToBoxAdapter(child: _buildHeader(context)),
+            SliverToBoxAdapter(child: HeaderWidget()),
             SliverToBoxAdapter(child: _buildMetrics()),
             SliverToBoxAdapter(
               child: SearchFilterWidget(
@@ -125,32 +126,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  'Asset dashboard',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                ),
-                SizedBox(height: 2),
-                Text(
-                  'Overview of all registered assets',
-                  style: TextStyle(fontSize: 13, color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
