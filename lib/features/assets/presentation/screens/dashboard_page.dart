@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'package:asset_management_mobile/features/assets/presentation/viewmodel/asset_view_model.dart';
 import 'package:asset_management_mobile/features/assets/presentation/widgets/metric_loading_shimmer.dart';
+import 'package:asset_management_mobile/features/assets/presentation/widgets/search_filter_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodel/metric/metric_view_model_provider.dart';
 import '../widgets/asset_card.dart';
 import '../widgets/loading_shimmer.dart';
 import '../widgets/metric_card.dart';
-import '../widgets/filter_chip.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
@@ -55,7 +55,33 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
           slivers: [
             SliverToBoxAdapter(child: _buildHeader(context)),
             SliverToBoxAdapter(child: _buildMetrics()),
-            SliverToBoxAdapter(child: _buildSearchAndFilters()),
+            SliverToBoxAdapter(
+              child: SearchFilterWidget(
+                searchController: _searchController,
+                filer: _filter,
+                onChange: (v) {
+                  setState(() => _search = v);
+
+                  if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+                  _debounce = Timer(const Duration(milliseconds: 500), () {
+                    ref
+                        .read(assetViewModelProvider.notifier)
+                        .filterAssets(
+                          name: v,
+                          status: _filter == 'All' ? '' : _filter,
+                        );
+                  });
+                },
+                onTap: (f) {
+                  setState(() => _filter = f);
+
+                  ref
+                      .read(assetViewModelProvider.notifier)
+                      .filterAssets(name: _search, status: f == 'All' ? '' : f);
+                },
+              ),
+            ),
             assetListState.when(
               loading: () => const SliverToBoxAdapter(child: LoadingShimmer()),
               error: (e, _) =>
@@ -194,78 +220,5 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       default:
         return const Color(0xFF424242);
     }
-  }
-
-  Widget _buildSearchAndFilters() {
-    final filters = [
-      'All',
-      'AVAILABLE',
-      'MAINTENANCE',
-      'ASSIGNED',
-      'RETIRED',
-      'PENDING',
-      'LOST',
-    ];
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-      child: Column(
-        children: [
-          TextField(
-            controller: _searchController,
-            onChanged: (v) {
-              setState(() => _search = v);
-
-              if (_debounce?.isActive ?? false) _debounce!.cancel();
-
-              _debounce = Timer(const Duration(milliseconds: 500), () {
-                ref
-                    .read(assetViewModelProvider.notifier)
-                    .filterAssets(
-                      name: v,
-                      status: _filter == 'All' ? '' : _filter,
-                    );
-              });
-            },
-            decoration: InputDecoration(
-              hintText: 'Search by name or serial no...',
-              prefixIcon: const Icon(Icons.search),
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: filters.map((f) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChipWidget(
-                    label: f == 'All'
-                        ? 'All'
-                        : f[0] + f.substring(1).toLowerCase(),
-                    selected: _filter == f,
-                    onTap: () {
-                      setState(() => _filter = f);
-
-                      ref
-                          .read(assetViewModelProvider.notifier)
-                          .filterAssets(
-                            name: _search,
-                            status: f == 'All' ? '' : f,
-                          );
-                    },
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
