@@ -5,7 +5,7 @@ import 'package:riverpod/riverpod.dart';
 final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
-      baseUrl: "http://192.168.1.121:3000",
+      baseUrl: "http://192.168.1.138:3000",
       connectTimeout: const Duration(seconds: 10),
       sendTimeout: const Duration(seconds: 10),
       headers: {'Content-Type': 'application/json'},

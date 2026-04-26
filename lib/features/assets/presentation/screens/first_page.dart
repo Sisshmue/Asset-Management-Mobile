@@ -4,16 +4,50 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dashboard_page.dart';
 
-class FirstPage extends ConsumerWidget {
+class FirstPage extends ConsumerStatefulWidget {
   const FirstPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FirstPage> createState() => _FirstPageState();
+}
+
+class _FirstPageState extends ConsumerState<FirstPage> {
+  void _showAddAssetSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        height: MediaQuery.of(context).size.height * 0.7,
+        child: const Center(child: Text("Add Asset Form Goes Here")),
+      ),
+    );
+  }
+
+  final List<ScrollController> controllers = [
+    ScrollController(),
+    ScrollController(),
+  ];
+
+  @override
+  void dispose() {
+    for (var controller in controllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final selectedIndex = ref.watch(navigationProvider);
     final theme = Theme.of(context);
-
-    final List<Widget> pages = [const DashboardPage(), const ProfilePage()];
-
+    final List<Widget> pages = [
+      DashboardPage(scrollController: controllers[0]),
+      const ProfilePage(),
+    ];
     return Scaffold(
       // Extends the body behind the FAB/BottomBar if needed
       extendBody: true,
@@ -32,7 +66,6 @@ class FirstPage extends ConsumerWidget {
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
         color: Colors.white,
-        // Using a Container with a specific height prevents the render exception
         child: SizedBox(
           height: 60,
           child: Row(
@@ -44,7 +77,17 @@ class FirstPage extends ConsumerWidget {
                 activeIcon: Icons.dashboard_customize,
                 label: "Dashboard",
                 isSelected: selectedIndex == 0,
-                onTap: () => ref.read(navigationProvider.notifier).state = 0,
+                onTap: () {
+                  if (selectedIndex == 0) {
+                    controllers[selectedIndex].animateTo(
+                      0,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeIn,
+                    );
+                  } else {
+                    ref.read(navigationProvider.notifier).state = 0;
+                  }
+                },
                 theme: theme,
               ),
 
@@ -63,21 +106,6 @@ class FirstPage extends ConsumerWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  void _showAddAssetSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        height: MediaQuery.of(context).size.height * 0.7,
-        child: const Center(child: Text("Add Asset Form Goes Here")),
       ),
     );
   }

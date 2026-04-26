@@ -9,7 +9,8 @@ import '../widgets/loading_shimmer.dart';
 import '../widgets/metrics_widget.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
-  const DashboardPage({super.key});
+  final ScrollController scrollController;
+  const DashboardPage({super.key, required this.scrollController});
 
   @override
   ConsumerState<DashboardPage> createState() => _DashboardPageState();
@@ -20,15 +21,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   String _filter = 'All';
   final _searchController = TextEditingController();
   Timer? _debounce;
-  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >=
-          _scrollController.position.maxScrollExtent - 200) {
+    widget.scrollController.addListener(() {
+      if (widget.scrollController.position.pixels >=
+          widget.scrollController.position.maxScrollExtent - 200) {
         ref.read(assetViewModelProvider.notifier).fetchMoreAssets();
       }
     });
@@ -38,7 +38,6 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
   void dispose() {
     _searchController.dispose();
     _debounce?.cancel();
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -50,7 +49,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
       backgroundColor: const Color(0xFFF7F7F5),
       body: SafeArea(
         child: CustomScrollView(
-          controller: _scrollController,
+          controller: widget.scrollController,
           slivers: [
             SliverToBoxAdapter(child: HeaderWidget()),
             SliverToBoxAdapter(child: MetricsWidget()),
