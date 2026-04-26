@@ -1,3 +1,4 @@
+import 'package:asset_management_mobile/features/assets/data/model/create_asset_model.dart';
 import 'package:dio/dio.dart';
 import '../../../../core/network/api_exception.dart';
 import '../model/asset_model.dart';
@@ -18,6 +19,18 @@ class AssetRemoteDatasource {
       } else {
         throw ApiException(message: 'Response is not a list');
       }
+    } catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
+  Future<String> createNewAsset(List<CreateAssetModel> assets) async {
+    try {
+      final response = await dio.post(
+        '/api/assets/create',
+        data: assets.map((a) => a.toJson()).toList(),
+      );
+      return response.data['message'];
     } catch (e) {
       throw ApiException.fromDioError(e);
     }

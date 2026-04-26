@@ -1,10 +1,15 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/model/asset_model.dart';
+import '../../data/model/create_asset_model.dart';
 import 'asset_repo_provider.dart';
 
 final assetViewModelProvider =
     AsyncNotifierProvider<AssetViewModel, List<Asset>>(AssetViewModel.new);
+final assetCreateViewModelProvider =
+    AsyncNotifierProvider<CreateAssetViewModel, String?>(
+      CreateAssetViewModel.new,
+    );
 
 class AssetViewModel extends AsyncNotifier<List<Asset>> {
   int _page = 1;
@@ -42,17 +47,6 @@ class AssetViewModel extends AsyncNotifier<List<Asset>> {
     _isLoadingMore = false;
   }
 
-  // Future<void> fetchAllAssets({int page = 1, int limit = 10}) async {
-  //   state = const AsyncLoading();
-  //   try {
-  //     final repo = ref.read(assetRepoProvider);
-  //     final response = await repo.getAllAssets(page: page, limit: limit);
-  //     state = AsyncData(response);
-  //   } catch (e, st) {
-  //     state = AsyncError(e, st);
-  //   }
-  // }
-
   Future<void> filterAssets({String name = "", String status = ""}) async {
     _page = 1;
     hasMore = true;
@@ -69,6 +63,24 @@ class AssetViewModel extends AsyncNotifier<List<Asset>> {
         limit: _limit,
       );
       hasMore = response.length == _limit;
+      state = AsyncData(response);
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+}
+
+class CreateAssetViewModel extends AsyncNotifier<String?> {
+  @override
+  Future<String?> build() async {
+    return "";
+  }
+
+  Future<void> createNewAsset(List<CreateAssetModel> assets) async {
+    state = const AsyncLoading();
+    try {
+      final repo = ref.read(assetRepoProvider);
+      final response = await repo.createNewAsset(assets);
       state = AsyncData(response);
     } catch (e, st) {
       state = AsyncError(e, st);

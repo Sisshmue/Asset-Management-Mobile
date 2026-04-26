@@ -1,4 +1,7 @@
+import 'package:asset_management_mobile/features/assets/presentation/widgets/add_asset_form.dart';
+
 import '../../../../core/utils/navigation_provider.dart';
+import '../widgets/nav_bar_item.dart';
 import 'profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,11 +22,7 @@ class _FirstPageState extends ConsumerState<FirstPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        height: MediaQuery.of(context).size.height * 0.7,
-        child: const Center(child: Text("Add Asset Form Goes Here")),
-      ),
+      builder: (context) => AddAssetForm(),
     );
   }
 
@@ -72,7 +71,7 @@ class _FirstPageState extends ConsumerState<FirstPage> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               // Dashboard Tab
-              _NavBarItem(
+              NavBarItem(
                 icon: Icons.dashboard_customize_outlined,
                 activeIcon: Icons.dashboard_customize,
                 label: "Dashboard",
@@ -95,7 +94,7 @@ class _FirstPageState extends ConsumerState<FirstPage> {
               const SizedBox(width: 40),
 
               // Profile Tab
-              _NavBarItem(
+              NavBarItem(
                 icon: Icons.person_outline,
                 activeIcon: Icons.person,
                 label: "Profile",
@@ -106,40 +105,6 @@ class _FirstPageState extends ConsumerState<FirstPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-// Custom widget for cleaner code
-class _NavBarItem extends StatelessWidget {
-  final IconData icon;
-  final IconData activeIcon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-  final ThemeData theme;
-
-  const _NavBarItem({
-    required this.icon,
-    required this.activeIcon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-    required this.theme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isSelected ? theme.primaryColor : Colors.grey;
-    return InkWell(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(isSelected ? activeIcon : icon, color: color),
-          Text(label, style: TextStyle(color: color, fontSize: 12)),
-        ],
       ),
     );
   }

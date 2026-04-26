@@ -1,7 +1,10 @@
+import 'package:asset_management_mobile/features/assets/presentation/viewmodel/metric/metric_view_model_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
 import 'filter_chip.dart';
 
-class SearchFilterWidget extends StatefulWidget {
+class SearchFilterWidget extends ConsumerStatefulWidget {
   final TextEditingController searchController;
   final String filer;
   final void Function(String)? onChange;
@@ -15,22 +18,15 @@ class SearchFilterWidget extends StatefulWidget {
   });
 
   @override
-  State<SearchFilterWidget> createState() => _SearchFilterWidgetState();
+  ConsumerState<SearchFilterWidget> createState() => _SearchFilterWidgetState();
 }
 
-class _SearchFilterWidgetState extends State<SearchFilterWidget> {
-  final filters = [
-    'All',
-    'AVAILABLE',
-    'MAINTENANCE',
-    'ASSIGNED',
-    'RETIRED',
-    'PENDING',
-    'LOST',
-  ];
-
+class _SearchFilterWidgetState extends ConsumerState<SearchFilterWidget> {
   @override
   Widget build(BuildContext context) {
+    final metricProvider = ref.watch(metricViewModelProvider);
+    final _filters = ['All'];
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
       child: Column(
@@ -49,21 +45,43 @@ class _SearchFilterWidgetState extends State<SearchFilterWidget> {
             ),
           ),
           const SizedBox(height: 10),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: filters.map((f) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChipWidget(
-                    label: f == 'All'
-                        ? 'All'
-                        : f[0] + f.substring(1).toLowerCase(),
-                    selected: widget.filer == f,
-                    onTap: () => widget.onTap?.call(f),
-                  ),
-                );
-              }).toList(),
+          metricProvider.when(
+            data: (metrics) {
+              final filters = metrics?.counts.keys.toList();
+              setState(() {
+                _filters.addAll(filters!);
+              });
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: _filters.map((f) {
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: FilterChipWidget(
+                        label: f == 'All'
+                            ? 'All'
+                            : f[0] + f.substring(1).toLowerCase(),
+                        selected: widget.filer == f,
+                        onTap: () => widget.onTap?.call(f),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              );
+            },
+            error: (e, st) => const SizedBox.shrink(),
+            loading: () => Shimmer.fromColors(
+              baseColor: Colors.grey.shade200,
+              highlightColor: Colors.white,
+              child: Container(
+                width: 50,
+                height: 50,
+                margin: const EdgeInsets.only(left: 12),
+                decoration: BoxDecoration(
+                  color: Colors.grey,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
             ),
           ),
         ],
